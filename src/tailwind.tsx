@@ -50,7 +50,7 @@ function functionTemplate<P extends ClassNameProp, E = any>(Element: React.Compo
     ) =>
         React.forwardRef<E, P & K>((props, ref) => (
             <Element
-                {...Object.fromEntries(Object.entries(props).filter(([key]) => key.charAt(0) !== "$")) as P} //filter props that starts with "$"
+                {...Object.fromEntries(Object.entries(props).filter(([key]) => key.charAt(0) !== "$")) as P} // filter out props that starts with "$"
                 ref={ref}
                 className={parseTailwindClassNames(
                     cleanTemplate(template, props.className),
@@ -61,13 +61,13 @@ function functionTemplate<P extends ClassNameProp, E = any>(Element: React.Compo
 }
 
 export type IntrinsicElements = {
-    [key in keyof JSX.IntrinsicElements]: FunctionTemplate<JSX.IntrinsicElements[key], key>
+    [key in keyof JSX.IntrinsicElements]: FunctionTemplate<JSX.IntrinsicElements[key], any>
 }
 
 const intrinsicElements: IntrinsicElements = domElements.reduce(
-    (acc, DomElement) => ({
+    <K extends keyof JSX.IntrinsicElements>(acc: IntrinsicElements, DomElement: K) => ({
         ...acc,
-        [DomElement]: functionTemplate((p) => <DomElement {...p} />)
+        [DomElement]: functionTemplate(DomElement as unknown as React.ComponentType<JSX.IntrinsicElements[K]>)
     }),
     {} as IntrinsicElements
 )
